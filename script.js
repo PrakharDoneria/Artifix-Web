@@ -1,34 +1,5 @@
-async function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function typeBotResponse(messageList, thinkingBubble, response) {
-    const botMessage = document.createElement('div');
-    botMessage.className = 'message botMessage';
-
-    for (let i = 0; i < response.length; i++) {
-        botMessage.textContent += response[i];
-        await sleep(50);
-        messageList.scrollTop = messageList.scrollHeight;
-    }
-
-    thinkingBubble.style.display = 'none';
-    messageList.appendChild(botMessage);
-    document.getElementById('status').textContent = 'Online';
-}
-
-async function displayErrorMessage(messageList, thinkingBubble, error) {
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'message botMessage error';
-    errorMessage.textContent = `Error: ${error}`;
-
-    thinkingBubble.style.display = 'none';
-    messageList.appendChild(errorMessage);
-    document.getElementById('status').textContent = 'Online';
-}
-
 async function sendMessage() {
-    const userInput = document.getElementById('userInput').value.toLowerCase(); // Convert input to lowercase
+    const userInput = document.getElementById('userInput').value.toLowerCase();
     const messageList = document.getElementById('messageList');
     const thinkingBubble = document.getElementById('thinkingBubble');
 
@@ -48,6 +19,17 @@ async function sendMessage() {
         if (userInput.includes('current date') || userInput.includes('current time') || userInput.includes('current day')) {
             const currentDate = new Date().toLocaleString();
             await typeBotResponse(messageList, thinkingBubble, `The current date and time is: ${currentDate}`);
+        }
+        // Check if the user input contains a query for live location
+        else if (userInput.includes('live location')) {
+            try {
+                const position = await getCurrentLocation();
+                const { latitude, longitude } = position.coords;
+                await typeBotResponse(messageList, thinkingBubble, `Your current location is: Latitude ${latitude}, Longitude ${longitude}`);
+            } catch (error) {
+                console.error(error);
+                await displayErrorMessage(messageList, thinkingBubble, 'Unable to retrieve live location.');
+            }
         } else {
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -78,41 +60,9 @@ async function sendMessage() {
     document.getElementById('userInput').value = '';
 }
 
-function saveChatHistory() {
-    const messageList = document.getElementById('messageList');
-    const chatHistory = [];
-
-    for (const message of messageList.children) {
-        const type = message.classList.contains('userMessage') ? 'user' : 'bot';
-        chatHistory.push({ type, message: message.textContent.trim() });
-    }
-
-    document.cookie = `chatHistory=${JSON.stringify(chatHistory)}`;
+// Function to get the current location using Geolocation API
+function getCurrentLocation() {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
 }
-
-// Get cookie by name
-function getCookie(name) {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? match[2] : null;
-}
-
-// Populate chat history from cookies
-function populateChatHistory() {
-    const messageList = document.getElementById('messageList');
-    const chatHistory = JSON.parse(getCookie('chatHistory')) || [];
-
-    for (const entry of chatHistory) {
-        const message = document.createElement('div');
-        message.className = `message ${entry.type === 'user' ? 'userMessage' : 'botMessage'}`;
-        message.textContent = entry.message;
-        messageList.appendChild(message);
-    }
-
-    messageList.scrollTop = messageList.scrollHeight;
-}
-
-// Initial population of chat history
-populateChatHistory();
-
-// Save chat history when leaving the page
-window.addEventListener('beforeunload', () => saveChatHistory());
