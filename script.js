@@ -76,7 +76,7 @@ async function sendMessage() {
             const temperatureKelvin = weatherData.main.temp;
             const temperatureCelsius = temperatureKelvin - 273.15;
             const roundedTemperature = Math.round(temperatureCelsius * 100) / 100; // Round to two decimal places
-            const response = `The current temperature is ${roundedTemperature}°C.`;
+            const response = `The current temperature is ${temperatureCelsius}°C.`;
 
             await typeBotResponse(messageList, thinkingBubble, response);
         } catch (error) {
