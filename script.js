@@ -73,8 +73,11 @@ async function sendMessage() {
         try {
             const weatherResponse = await fetch(weatherApiUrl);
             const weatherData = await weatherResponse.json();
-            const temperature = weatherData.main.temp;
-            const response = `The current temperature is ${temperature}°C.`;
+            const temperatureKelvin = weatherData.main.temp;
+            const temperatureCelsius = temperatureKelvin - 273.15;
+            const roundedTemperature = Math.round(temperatureCelsius * 100) / 100; // Round to two decimal places
+            const response = `The current temperature is ${roundedTemperature}°C.`;
+
             await typeBotResponse(messageList, thinkingBubble, response);
         } catch (error) {
             console.error(error);
