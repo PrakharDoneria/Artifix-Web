@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artifix Web</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="toolbar">
+        <div id="userDetails">
+            <img id="profilePhoto" src="assets/logo.png" alt="Profile Photo">
+            <div id="usernameStatus">
+                <div id="username">Artifix Ai</div>
+                <div id="status">Online</div>
+            </div>
+        </div>
+    </div>
+    <div id="messageList"></div>
+    <form onsubmit="sendMessage(); return false;">
+        <input type="text" id="userInput" placeholder="Type your message..." class="p-4" />
+        <button type="submit" id="sendMessageBtn" class="rounded-full">
+            <span class="material-icons">Send</span>
+        </button>
+        <div id="thinkingBubble" class="text-gray-500 text-sm">...</div>
+    </form>
+
+    <script src="script.js"></script>
+</body>
+</html>
