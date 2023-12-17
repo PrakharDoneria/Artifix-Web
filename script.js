@@ -1,36 +1,10 @@
-async function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function typeBotResponse(messageList, thinkingBubble, response) {
-    const botMessage = document.createElement('div');
-    botMessage.className = 'message botMessage';
-
-    for (let i = 0; i < response.length; i++) {
-        botMessage.textContent += response[i];
-        await sleep(50);
-        messageList.scrollTop = messageList.scrollHeight;
-    }
-
-    thinkingBubble.style.display = 'none';
-    messageList.appendChild(botMessage);
-    document.getElementById('status').textContent = 'Online';
-}
-
-async function displayErrorMessage(messageList, thinkingBubble, error) {
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'message botMessage error';
-    errorMessage.textContent = `Error: ${error}`;
-
-    thinkingBubble.style.display = 'none';
-    messageList.appendChild(errorMessage);
-    document.getElementById('status').textContent = 'Online';
-}
-
 async function sendMessage() {
     const userInput = document.getElementById('userInput').value;
     const messageList = document.getElementById('messageList');
     const thinkingBubble = document.getElementById('thinkingBubble');
+
+    // Clear input box text
+    clearInput();
 
     const userMessage = document.createElement('div');
     userMessage.className = 'message userMessage';
@@ -40,73 +14,93 @@ async function sendMessage() {
     thinkingBubble.style.display = 'inline';
     document.getElementById('status').textContent = 'Typing...';
 
-    const apiUrl = 'https://api.openai.com/v1/engines/gpt-3.5-turbo-1106/completions';
-    const openaiApiKey = 'OpenAI-API-KEY-HERE';
+    // Check for specific queries
+    if (userInput.toLowerCase().includes('date') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('day')) {
+        // Handle date, time, day query
+        const currentDate = new Date().toLocaleString();
+        await typeBotResponse(messageList, thinkingBubble, `Current date and time: ${currentDate}`);
+    } else if (userInput.toLowerCase().includes('news')) {
+        // Handle news query
+        const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db'; // Replace with your News API key
 
-    try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${openaiApiKey}`,
-            },
-            body: JSON.stringify({
-                prompt: userInput,
-                max_tokens: 50,
-                temperature: 0.5,
-            }),
-        }).then(res => res.json());
+        try {
+            const newsResponse = await fetch(`https://newsapi.org/v2/top-headlines?apiKey=${newsApiKey}`);
+            const newsData = await newsResponse.json();
 
-        console.log(response);
-
-        if (response.choices && response.choices.length > 0) {
-            await typeBotResponse(messageList, thinkingBubble, response.choices[0].text);
-        } else {
-            throw new Error('Invalid response from server');
+            if (newsData.articles && newsData.articles.length > 0) {
+                const topNews = newsData.articles[0].title;
+                await typeBotResponse(messageList, thinkingBubble, `Latest news: ${topNews}`);
+            } else {
+                throw new Error('No news articles found.');
+            }
+        } catch (error) {
+            console.error(error);
+            await displayErrorMessage(messageList, thinkingBubble, 'Error fetching news.');
         }
-    } catch (error) {
-        console.error(error);
-        await displayErrorMessage(messageList, thinkingBubble, error.message);
+    } else if (userInput.toLowerCase().includes('temperature')) {
+        // Handle temperature query using OpenWeatherMap API
+        const openWeatherApiKey = '4b08a31d0b102256e3becde9631af19d'; // Replace with your OpenWeatherMap API key
+
+        try {
+            const locationData = await getCurrentLocation();
+            const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${locationData.latitude}&lon=${locationData.longitude}&appid=${openWeatherApiKey}`);
+            const weatherData = await weatherResponse.json();
+
+            if (weatherData.main && weatherData.main.temp) {
+                const currentTemperature = weatherData.main.temp;
+                await typeBotResponse(messageList, thinkingBubble, `Current temperature: ${currentTemperature}°C`);
+            } else {
+                throw new Error('Temperature data not available.');
+            }
+        } catch (error) {
+            console.error(error);
+            await displayErrorMessage(messageList, thinkingBubble, 'Error fetching temperature.');
+        }
+    } else {
+        // Handle generic query using OpenAI API
+        const apiUrl = 'https://api.openai.com/v1/engines/gpt-3.5-turbo-1106/completions';
+        const openaiApiKey = 'OpenAI-API-KEY-HERE';
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                },
+                body: JSON.stringify({
+                    prompt: userInput,
+                    max_tokens: 50,
+                    temperature: 0.5,
+                }),
+            }).then(res => res.json());
+
+            console.log(response);
+
+            if (response.choices && response.choices.length > 0) {
+                await typeBotResponse(messageList, thinkingBubble, response.choices[0].text);
+            } else {
+                throw new Error('Invalid response from server');
+            }
+        } catch (error) {
+            console.error(error);
+            await displayErrorMessage(messageList, thinkingBubble, error.message);
+        }
     }
-
-    document.getElementById('userInput').value = '';
 }
 
-function saveChatHistory() {
-    const messageList = document.getElementById('messageList');
-    const chatHistory = [];
-
-    for (const message of messageList.children) {
-        const type = message.classList.contains('userMessage') ? 'user' : 'bot';
-        chatHistory.push({ type, message: message.textContent.trim() });
-    }
-
-    document.cookie = `chatHistory=${JSON.stringify(chatHistory)}`;
+async function getCurrentLocation() {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                });
+            },
+            error => {
+                reject(error);
+            }
+        );
+    });
 }
-
-// Get cookie by name
-function getCookie(name) {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? match[2] : null;
-}
-
-// Populate chat history from cookies
-function populateChatHistory() {
-    const messageList = document.getElementById('messageList');
-    const chatHistory = JSON.parse(getCookie('chatHistory')) || [];
-
-    for (const entry of chatHistory) {
-        const message = document.createElement('div');
-        message.className = `message ${entry.type === 'user' ? 'userMessage' : 'botMessage'}`;
-        message.textContent = entry.message;
-        messageList.appendChild(message);
-    }
-
-    messageList.scrollTop = messageList.scrollHeight;
-}
-
-// Initial population of chat history
-populateChatHistory();
-
-// Save chat history when leaving the page
-window.addEventListener('beforeunload', () => saveChatHistory());
