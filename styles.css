@@ -54,8 +54,7 @@ body {
 }
 
 #messageList {
-    position: relative; /* Updated: Ensure messages don't hide behind input */
-    padding: 80px 20px 20px;
+    padding: 80px 20px 80px; /* Updated: Added padding-bottom to create space for input */
     overflow-y: auto;
     max-height: calc(100vh - 80px);
 }
@@ -108,7 +107,7 @@ body {
     border-radius: 20px;
     cursor: pointer;
     position: fixed;
-    bottom: 80px; /* Updated: Adjusted to prevent overlap with input */
+    bottom: 20px;
     right: 20px;
 }
 
