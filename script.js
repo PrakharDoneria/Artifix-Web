@@ -4,7 +4,7 @@ async function sendMessage() {
     const thinkingBubble = document.getElementById('thinkingBubble');
 
     // Clear input box text
-    clearInput();
+    document.getElementById('userInput').value = '';
 
     const userMessage = document.createElement('div');
     userMessage.className = 'message userMessage';
@@ -21,7 +21,7 @@ async function sendMessage() {
         await typeBotResponse(messageList, thinkingBubble, `Current date and time: ${currentDate}`);
     } else if (userInput.toLowerCase().includes('news')) {
         // Handle news query
-        const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db'; // Replace with your News API key
+        const newsApiKey = 'YOUR_NEWSAPI_KEY_HERE'; // Replace with your News API key
 
         try {
             const newsResponse = await fetch(`https://newsapi.org/v2/top-headlines?apiKey=${newsApiKey}`);
@@ -103,10 +103,6 @@ async function getCurrentLocation() {
             }
         );
     });
-}
-
-function clearInput() {
-    document.getElementById('userInput').value = '';
 }
 
 // Use the form's submit event to trigger sendMessage
