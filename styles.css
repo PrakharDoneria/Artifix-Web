@@ -54,6 +54,7 @@ body {
 }
 
 #messageList {
+    position: relative; /* Updated: Ensure messages don't hide behind input */
     padding: 80px 20px 20px;
     overflow-y: auto;
     max-height: calc(100vh - 80px);
@@ -107,7 +108,7 @@ body {
     border-radius: 20px;
     cursor: pointer;
     position: fixed;
-    bottom: 20px;
+    bottom: 80px; /* Updated: Adjusted to prevent overlap with input */
     right: 20px;
 }
 
@@ -118,4 +119,4 @@ body {
 
 .error {
     color: #ff0000;
-  }
+}
