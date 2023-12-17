@@ -1,0 +1,112 @@
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function typeBotResponse(messageList, thinkingBubble, response) {
+    const botMessage = document.createElement('div');
+    botMessage.className = 'message botMessage';
+
+    for (let i = 0; i < response.length; i++) {
+        botMessage.textContent += response[i];
+        await sleep(50);
+        messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    thinkingBubble.style.display = 'none';
+    messageList.appendChild(botMessage);
+    document.getElementById('status').textContent = 'Online';
+}
+
+async function displayErrorMessage(messageList, thinkingBubble, error) {
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'message botMessage error';
+    errorMessage.textContent = `Error: ${error}`;
+
+    thinkingBubble.style.display = 'none';
+    messageList.appendChild(errorMessage);
+    document.getElementById('status').textContent = 'Online';
+}
+
+async function sendMessage() {
+    const userInput = document.getElementById('userInput').value;
+    const messageList = document.getElementById('messageList');
+    const thinkingBubble = document.getElementById('thinkingBubble');
+
+    const userMessage = document.createElement('div');
+    userMessage.className = 'message userMessage';
+    userMessage.textContent = userInput;
+    messageList.appendChild(userMessage);
+
+    thinkingBubble.style.display = 'inline';
+    document.getElementById('status').textContent = 'Typing...';
+
+    const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
+    const openaiApiKey = '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';
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${openaiApiKey}`,
+            },
+            body: JSON.stringify({
+                prompt: userInput,
+                max_tokens: 50,
+                temperature: 0.5,
+            }),
+        }).then(res => res.json());
+
+        console.log(response);
+
+        if (response.choices && response.choices.length > 0) {
+            await typeBotResponse(messageList, thinkingBubble, response.choices[0].text);
+        } else {
+            throw new Error('Invalid response from server');
+        }
+    } catch (error) {
+        console.error(error);
+        await displayErrorMessage(messageList, thinkingBubble, error.message);
+    }
+
+    document.getElementById('userInput').value = '';
+}
+
+function saveChatHistory() {
+    const messageList = document.getElementById('messageList');
+    const chatHistory = [];
+
+    for (const message of messageList.children) {
+        const type = message.classList.contains('userMessage') ? 'user' : 'bot';
+        chatHistory.push({ type, message: message.textContent.trim() });
+    }
+
+    document.cookie = `chatHistory=${JSON.stringify(chatHistory)}`;
+}
+
+// Get cookie by name
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+}
+
+// Populate chat history from cookies
+function populateChatHistory() {
+    const messageList = document.getElementById('messageList');
+    const chatHistory = JSON.parse(getCookie('chatHistory')) || [];
+
+    for (const entry of chatHistory) {
+        const message = document.createElement('div');
+        message.className = `message ${entry.type === 'user' ? 'userMessage' : 'botMessage'}`;
+        message.textContent = entry.message;
+        messageList.appendChild(message);
+    }
+
+    messageList.scrollTop = messageList.scrollHeight;
+}
+
+// Initial population of chat history
+populateChatHistory();
+
+// Save chat history when leaving the page
+window.addEventListener('beforeunload', () => saveChatHistory());
