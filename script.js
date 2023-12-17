@@ -27,6 +27,7 @@ async function displayErrorMessage(messageList, thinkingBubble, error) {
     document.getElementById('status').textContent = 'Online';
 }
 
+
 async function sendMessage() {
     const userInput = document.getElementById('userInput').value;
     const messageList = document.getElementById('messageList');
@@ -40,83 +41,92 @@ async function sendMessage() {
     thinkingBubble.style.display = 'inline';
     document.getElementById('status').textContent = 'Typing...';
 
-    // Check for specific queries
-    if (userInput.toLowerCase().includes('day today') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('date today')) {
-        const currentDate = new Date();
-        const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
-        await typeBotResponse(messageList, thinkingBubble, response);
-    } else if (userInput.toLowerCase().includes('news')) {
-        // Fetch news using News API based on user's country (you may need to adjust this part)
-        
-        
-        const newsApiKey = 'NewsAPI-KEY-HERE';
-        const country = 'in'; // You can get the user's location using Mozilla Geolocation API
-        const newsApiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${newsApiKey}`;
-        
-        try {
-            const newsResponse = await fetch(newsApiUrl);
-            const newsData = await newsResponse.json();
-            const articles = newsData.articles.slice(0, 3); // Displaying top 3 articles
-            const response = articles.map(article => `${article.title} - ${article.url}`).join('\n');
+    // Fetch user's location using ipinfo.io
+    const ipinfoApiKey = '7ccae9c8d8744e'; // Replace with your actual IPinfo.io API key
+    const ipinfoUrl = `https://ipinfo.io/json?token=${ipinfoApiKey}`;
+
+    try {
+        const ipinfoResponse = await fetch(ipinfoUrl);
+        const ipinfoData = await ipinfoResponse.json();
+        const userCity = ipinfoData.city;
+
+        // Check for specific queries
+        if (userInput.toLowerCase().includes('day today') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('date today')) {
+            const currentDate = new Date();
+            const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
             await typeBotResponse(messageList, thinkingBubble, response);
-        } catch (error) {
-            console.error(error);
-            await displayErrorMessage(messageList, thinkingBubble, 'Error fetching news.');
-        }
-    } else if (userInput.toLowerCase().includes('temperature')) {
-        // Fetch temperature using OpenWeatherMap API (you need to sign up for an API key)
-        
-        const weatherApiKey = 'Weather-API-Key';
-        const city = 'Etawah'; // You can get the user's location using Mozilla Geolocation API
-        const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weatherApiKey}`;
+        } else if (userInput.toLowerCase().includes('news')) {
+            // Fetch news using News API based on user's city
+            const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db';
+            const newsApiUrl = `https://newsapi.org/v2/top-headlines?q=${userCity}&apiKey=${newsApiKey}`;
 
-        try {
-            const weatherResponse = await fetch(weatherApiUrl);
-            const weatherData = await weatherResponse.json();
-            const temperatureKelvin = weatherData.main.temp;
-            const temperatureCelsius = temperatureKelvin - 273.15;
-            const roundedTemperature = Math.round(temperatureCelsius * 100) / 100; // Round to two decimal places
-            const response = `The current temperature is ${temperatureCelsius}°C.`;
-
-            await typeBotResponse(messageList, thinkingBubble, response);
-        } catch (error) {
-            console.error(error);
-            await displayErrorMessage(messageList, thinkingBubble, 'Error fetching temperature.');
-        }
-    } else {
-        // Default behavior using OpenAI GPT-3
-        const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
-        const openaiApiKey = 'OpenAI-API-KEY';
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${openaiApiKey}`,
-                },
-                body: JSON.stringify({
-                    prompt: userInput,
-                    max_tokens: 50,
-                    temperature: 0.5,
-                }),
-            }).then(res => res.json());
-
-            console.log(response);
-
-            if (response.choices && response.choices.length > 0) {
-                await typeBotResponse(messageList, thinkingBubble, response.choices[0].text);
-            } else {
-                throw new Error('Invalid response from server');
+            try {
+                const newsResponse = await fetch(newsApiUrl);
+                const newsData = await newsResponse.json();
+                const articles = newsData.articles.slice(0, 3); // Displaying top 3 articles
+                const response = articles.map(article => `${article.title} - ${article.url}`).join('\n');
+                await typeBotResponse(messageList, thinkingBubble, response);
+            } catch (error) {
+                console.error(error);
+                await displayErrorMessage(messageList, thinkingBubble, 'Error fetching news.');
             }
-        } catch (error) {
-            console.error(error);
-            await displayErrorMessage(messageList, thinkingBubble, error.message);
+        } else if (userInput.toLowerCase().includes('temperature')) {
+            // Fetch temperature using OpenWeatherMap API
+            const weatherApiKey = '4b08a31d0b102256e3becde9631af19d';
+            const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${userCity}&appid=${weatherApiKey}`;
+
+            try {
+                const weatherResponse = await fetch(weatherApiUrl);
+                const weatherData = await weatherResponse.json();
+                const temperatureKelvin = weatherData.main.temp;
+                const temperatureCelsius = temperatureKelvin - 273.15;
+                const roundedTemperature = Math.round(temperatureCelsius); // Round to two decimal places
+                const response = `The current temperature in ${userCity} is ${roundedTemperature}°C.`;
+
+                await typeBotResponse(messageList, thinkingBubble, response);
+            } catch (error) {
+                console.error(error);
+                await displayErrorMessage(messageList, thinkingBubble, 'Error fetching temperature.');
+            }
+        } else {
+            // Default behavior using OpenAI GPT-3
+            const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
+            const openaiApiKey = 'OpenAI-API-KEY';
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${openaiApiKey}`,
+                    },
+                    body: JSON.stringify({
+                        prompt: userInput,
+                        max_tokens: 50,
+                        temperature: 0.5,
+                    }),
+                }).then(res => res.json());
+
+                console.log(response);
+
+                if (response.choices && response.choices.length > 0) {
+                    await typeBotResponse(messageList, thinkingBubble, response.choices[0].text);
+                } else {
+                    throw new Error('Invalid response from server');
+                }
+            } catch (error) {
+                console.error(error);
+                await displayErrorMessage(messageList, thinkingBubble, error.message);
+            }
         }
+    } catch (error) {
+        console.error(error);
+        await displayErrorMessage(messageList, thinkingBubble, 'Error fetching user location.');
     }
 
     document.getElementById('userInput').value = '';
 }
+
 
 function saveChatHistory() {
     const messageList = document.getElementById('messageList');
