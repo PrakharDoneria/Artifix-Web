@@ -40,8 +40,8 @@ async function sendMessage() {
     thinkingBubble.style.display = 'inline';
     document.getElementById('status').textContent = 'Typing...';
 
-    const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
-    const openaiApiKey = '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';
+    const apiUrl = 'https://api.openai.com/v1/engines/gpt-3.5-turbo-1106/completions';
+    const openaiApiKey = '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';
 
     try {
         const response = await fetch(apiUrl, {
