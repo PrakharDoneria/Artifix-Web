@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="GitHub" src="https://img.shields.io/github/license/PrakharDoneria/Artifix-Web">
-  <img alt="Code Climate maintainability" src="https://img.shields.io/codeclimate/maintainability/PrakharDoneria/Artifix-Web">
+  
   <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/PrakharDoneria/Artifix-Web">
   <img alt="W3C Validation" src="https://img.shields.io/w3c-validation/html?targetUrl=https%3A%2F%2Fprakhardoneria.github.io%2FArtifix-Web%2F">
 
