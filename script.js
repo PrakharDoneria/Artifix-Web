@@ -48,7 +48,7 @@ async function sendMessage() {
     } else if (userInput.toLowerCase().includes('news')) {
         // Fetch news using News API based on user's country (you may need to adjust this part)
         
-        Replace 'YOUR_NEWS_API_KEY' with your actual News API key
+        
         const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db';
         const country = 'in'; // You can get the user's location using Mozilla Geolocation API
         const newsApiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${newsApiKey}`;
