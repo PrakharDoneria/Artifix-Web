@@ -47,9 +47,10 @@ async function sendMessage() {
         await typeBotResponse(messageList, thinkingBubble, response);
     } else if (userInput.toLowerCase().includes('news')) {
         // Fetch news using News API based on user's country (you may need to adjust this part)
-        // Replace 'YOUR_NEWS_API_KEY' with your actual News API key
+        
+        Replace 'YOUR_NEWS_API_KEY' with your actual News API key
         const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db';
-        const country = 'us'; // You can get the user's location using Mozilla Geolocation API
+        const country = 'in'; // You can get the user's location using Mozilla Geolocation API
         const newsApiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${newsApiKey}`;
         
         try {
@@ -64,9 +65,9 @@ async function sendMessage() {
         }
     } else if (userInput.toLowerCase().includes('temperature')) {
         // Fetch temperature using OpenWeatherMap API (you need to sign up for an API key)
-        // Replace 'YOUR_OPENWEATHERMAP_API_KEY' with your actual OpenWeatherMap API key
+        
         const weatherApiKey = '4b08a31d0b102256e3becde9631af19d';
-        const city = 'YourCity'; // You can get the user's location using Mozilla Geolocation API
+        const city = 'Etawah'; // You can get the user's location using Mozilla Geolocation API
         const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weatherApiKey}`;
 
         try {
