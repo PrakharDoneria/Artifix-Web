@@ -1,0 +1,121 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    color: #333;
+}
+
+#toolbar {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    text-align: left;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+#profilePhoto {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+#userDetails {
+    display: flex;
+    align-items: center;
+}
+
+#usernameStatus {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+#username {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+#status {
+    font-size: 0.8em;
+}
+
+#messageList {
+    padding: 80px 20px 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+}
+
+.message {
+    margin-bottom: 20px;
+}
+
+.userMessage {
+    background-color: #3b82f6;
+    color: #fff;
+    border-radius: 20px;
+    padding: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.botMessage {
+    background-color: #e5e7eb;
+    border-radius: 20px;
+    padding: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+    align-self: flex-start;
+}
+
+#userInput {
+    width: calc(100% - 40px);
+    padding: 15px;
+    margin: 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: #fff;
+    font-size: 16px;
+    outline: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.2);
+    color: #333;
+}
+
+#sendMessageBtn {
+    background-color: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+#thinkingBubble {
+    display: none;
+    margin-left: 20px;
+}
+
+.error {
+    color: #ff0000;
+  }
