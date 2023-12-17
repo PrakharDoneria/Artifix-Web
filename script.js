@@ -41,7 +41,7 @@ async function sendMessage() {
     document.getElementById('status').textContent = 'Typing...';
 
     const apiUrl = 'https://api.openai.com/v1/engines/gpt-3.5-turbo-1106/completions';
-    const openaiApiKey = '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';
+    const openaiApiKey = 'OpenAI-API-KEY-HERE';
 
     try {
         const response = await fetch(apiUrl, {
