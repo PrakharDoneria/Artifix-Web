@@ -54,7 +54,7 @@ body {
 }
 
 #messageList {
-    padding: 80px 20px 80px; /* Updated: Added padding-bottom to create space for input */
+    padding: 80px 20px 20px;
     overflow-y: auto;
     max-height: calc(100vh - 80px);
 }
