@@ -39,7 +39,7 @@ async function sendMessage() {
         }
     } else if (userInput.toLowerCase().includes('temperature')) {
         // Handle temperature query using OpenWeatherMap API
-        const openWeatherApiKey = '4b08a31d0b102256e3becde9631af19d'; // Replace with your OpenWeatherMap API key
+        const openWeatherApiKey = 'YOUR_OPENWEATHER_API_KEY_HERE'; // Replace with your OpenWeatherMap API key
 
         try {
             const locationData = await getCurrentLocation();
@@ -104,3 +104,13 @@ async function getCurrentLocation() {
         );
     });
 }
+
+function clearInput() {
+    document.getElementById('userInput').value = '';
+}
+
+// Use the form's submit event to trigger sendMessage
+document.querySelector('form').addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevent the default form submission
+    sendMessage();
+});
