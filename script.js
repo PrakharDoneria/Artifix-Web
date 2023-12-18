@@ -27,6 +27,29 @@ async function displayErrorMessage(messageList, thinkingBubble, error) {
     document.getElementById('status').textContent = 'Online';
 }
 
+async function fetchWikipediaSummary(query) {
+    const wikipediaApiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles=${query}&origin=*`;
+
+    try {
+        const response = await fetch(wikipediaApiUrl);
+        const data = await response.json();
+
+        const pageId = Object.keys(data.query.pages)[0];
+        const extract = data.query.pages[pageId]?.extract;
+
+        if (extract) {
+            // Clean up HTML tags and extract the first paragraph as a summary
+            const summary = extract.replace(/<\/?[^>]+(>|$)/g, '').split('\n')[0];
+            return summary.trim() !== '' ? summary : null;
+        } else {
+            throw new Error('No information found on Wikipedia.');
+        }
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error fetching information from Wikipedia.');
+    }
+}
+
 async function sendMessage() {
     const userInput = document.getElementById('userInput').value;
     const messageList = document.getElementById('messageList');
@@ -95,30 +118,17 @@ async function sendMessage() {
         } else if (userInput.toLowerCase().includes('who is')) {
             const personQuery = userInput.toLowerCase().replace('who is', '').trim();
 
-            const wikipediaUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles=${personQuery}&origin=*`;
-
             try {
-                const wikipediaResponse = await fetch(wikipediaUrl);
-                const wikipediaData = await wikipediaResponse.json();
+                const wikipediaSummary = await fetchWikipediaSummary(personQuery);
 
-                const pageId = Object.keys(wikipediaData.query.pages)[0];
-                const extract = wikipediaData.query.pages[pageId]?.extract;
-
-                if (extract) {
-                    // Clean up HTML tags and extract the first paragraph as a summary
-                    const summary = extract.replace(/<\/?[^>]+(>|$)/g, '').split('\n')[0];
-
-                    if (summary.trim() !== '') {
-                        await typeBotResponse(messageList, thinkingBubble, summary);
-                    } else {
-                        throw new Error('No relevant information found on Wikipedia.');
-                    }
+                if (wikipediaSummary !== null) {
+                    await typeBotResponse(messageList, thinkingBubble, wikipediaSummary);
                 } else {
-                    throw new Error('No information found on Wikipedia.');
+                    throw new Error('No relevant information found on Wikipedia.');
                 }
             } catch (error) {
                 console.error(error);
-                await displayErrorMessage(messageList, thinkingBubble, 'Error fetching information from Wikipedia.');
+                await displayErrorMessage(messageList, thinkingBubble, error.message);
             }
         } else {
             const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
