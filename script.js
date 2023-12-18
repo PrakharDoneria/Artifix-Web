@@ -55,9 +55,8 @@ async function sendMessage() {
             const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
             await typeBotResponse(messageList, thinkingBubble, response);
         } else if (userInput.toLowerCase().includes('news')) {
-            // Fetch news using News API based on user's country (you can use userCity or a default country)
             const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db';
-            const country = 'us'; // Replace with user's country or set a default
+            const country = 'us';
 
             const newsApiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${newsApiKey}`;
 
@@ -66,19 +65,17 @@ async function sendMessage() {
                 const newsData = await newsResponse.json();
 
                 if (newsData.status === 'ok') {
-                    const articles = newsData.articles.slice(0, 3); // Displaying top 3 articles
+                    const articles = newsData.articles.slice(0, 3);
                     const response = articles.map(article => `${article.title} - ${article.url}`).join('\n');
                     await typeBotResponse(messageList, thinkingBubble, response);
                 } else {
                     throw new Error('Error fetching news.');
                 }
             } catch (error) {
-                throw new Error(error);
                 console.error(error);
                 await displayErrorMessage(messageList, thinkingBubble, 'Error fetching news.');
             }
         } else if (userInput.toLowerCase().includes('temperature')) {
-            // Fetch temperature using OpenWeatherMap API
             const weatherApiKey = '4b08a31d0b102256e3becde9631af19d';
             const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${userCity}&appid=${weatherApiKey}`;
 
@@ -87,7 +84,7 @@ async function sendMessage() {
                 const weatherData = await weatherResponse.json();
                 const temperatureKelvin = weatherData.main.temp;
                 const temperatureCelsius = temperatureKelvin - 273.15;
-                const roundedTemperature = Math.round(temperatureCelsius); // Round to two decimal places
+                const roundedTemperature = Math.round(temperatureCelsius);
                 const response = `The current temperature in ${userCity} is ${roundedTemperature}°C.`;
 
                 await typeBotResponse(messageList, thinkingBubble, response);
@@ -95,10 +92,30 @@ async function sendMessage() {
                 console.error(error);
                 await displayErrorMessage(messageList, thinkingBubble, 'Error fetching temperature.');
             }
+        } else if (userInput.toLowerCase().includes('who is')) {
+            const personQuery = userInput.toLowerCase().replace('who is', '').trim();
+
+            const wikipediaUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles=${personQuery}&origin=*`;
+
+            try {
+                const wikipediaResponse = await fetch(wikipediaUrl);
+                const wikipediaData = await wikipediaResponse.json();
+
+                const pageId = Object.keys(wikipediaData.query.pages)[0];
+                const extract = wikipediaData.query.pages[pageId].extract;
+
+                if (extract) {
+                    await typeBotResponse(messageList, thinkingBubble, extract);
+                } else {
+                    throw new Error('No information found on Wikipedia.');
+                }
+            } catch (error) {
+                console.error(error);
+                await displayErrorMessage(messageList, thinkingBubble, 'Error fetching information from Wikipedia.');
+            }
         } else {
-            // Default behavior using OpenAI GPT-3
             const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
-            const openaiApiKey = 'OpenAI-API-KEY'; // Replace with your actual OpenAI GPT-3 API key
+            const openaiApiKey = 'OpenAI-API-KEY';
 
             try {
                 const response = await fetch(apiUrl, {
@@ -146,13 +163,11 @@ function saveChatHistory() {
     document.cookie = `chatHistory=${JSON.stringify(chatHistory)}`;
 }
 
-// Get cookie by name
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? match[2] : null;
 }
 
-// Populate chat history from cookies
 function populateChatHistory() {
     const messageList = document.getElementById('messageList');
     const chatHistory = JSON.parse(getCookie('chatHistory')) || [];
@@ -167,8 +182,6 @@ function populateChatHistory() {
     messageList.scrollTop = messageList.scrollHeight;
 }
 
-// Initial population of chat history
 populateChatHistory();
 
-// Save chat history when leaving the page
 window.addEventListener('beforeunload', () => saveChatHistory());
