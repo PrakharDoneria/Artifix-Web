@@ -6,11 +6,8 @@ async function typeBotResponse(messageList, thinkingBubble, response) {
     const botMessage = document.createElement('div');
     botMessage.className = 'message botMessage';
 
-    for (let i = 0; i < response.length; i++) {
-        botMessage.textContent += response[i];
-        await sleep(50);
-        messageList.scrollTop = messageList.scrollHeight;
-    }
+    const textNode = document.createTextNode(response);
+    botMessage.appendChild(textNode);
 
     thinkingBubble.style.display = 'none';
     messageList.appendChild(botMessage);
@@ -45,6 +42,24 @@ async function fetchTriviaQuestion() {
     }
 }
 
+async function solveHomeworkQuestion() {
+    const homeworkApiUrl = 'https://example.com/homework-api'; // Replace with the actual API endpoint
+
+    try {
+        const response = await fetch(homeworkApiUrl);
+        const data = await response.json();
+
+        if (data.question && data.answer) {
+            return `Here's the solution for your homework question:\nQuestion: ${data.question}\nAnswer: ${data.answer}`;
+        } else {
+            throw new Error('Error fetching homework question.');
+        }
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error fetching homework question.');
+    }
+}
+
 async function sendMessage() {
     const userInput = document.getElementById('userInput').value;
     const messageList = document.getElementById('messageList');
@@ -59,34 +74,18 @@ async function sendMessage() {
     document.getElementById('status').textContent = 'Typing...';
 
     try {
-        if (userInput.toLowerCase().includes('day today') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('date today')) {
-            const currentDate = new Date();
-            const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
-            await typeBotResponse(messageList, thinkingBubble, response);
-        } else if (userInput.toLowerCase().includes('temperature')) {
-            // Weather API code (unchanged)
-            const ipinfoApiKey = '7ccae9c8d8744e';
-            const ipinfoUrl = `https://ipinfo.io/json?token=${ipinfoApiKey}`;
-
-            const ipinfoResponse = await fetch(ipinfoUrl);
-            const ipinfoData = await ipinfoResponse.json();
-            const userCity = ipinfoData.city;
-
-            const weatherApiKey = '4b08a31d0b102256e3becde9631af19d';
-            const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${userCity}&appid=${weatherApiKey}`;
-
-            const weatherResponse = await fetch(weatherApiUrl);
-            const weatherData = await weatherResponse.json();
-            const temperatureKelvin = weatherData.main.temp;
-            const temperatureCelsius = temperatureKelvin - 273.15;
-            const roundedTemperature = Math.round(temperatureCelsius);
-            const response = `The current temperature in ${userCity} is ${roundedTemperature}°C.`;
-
-            await typeBotResponse(messageList, thinkingBubble, response);
-        } else if (userInput.toLowerCase().includes('homework') || userInput.toLowerCase().includes('question')) {
+        if (userInput.toLowerCase().includes('ask me a question')) {
             // Trivia question API code
             const triviaQuestion = await fetchTriviaQuestion();
             await typeBotResponse(messageList, thinkingBubble, `Sure, here's a trivia question for you:\n${triviaQuestion}`);
+        } else if (userInput.toLowerCase().includes('help me in homework')) {
+            // Homework question API code
+            const homeworkSolution = await solveHomeworkQuestion();
+            await typeBotResponse(messageList, thinkingBubble, homeworkSolution);
+        } else if (userInput.toLowerCase().includes('day today') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('date today')) {
+            const currentDate = new Date();
+            const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
+            await typeBotResponse(messageList, thinkingBubble, response);
         } else {
             // OpenAI GPT-3 code (unchanged)
             const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
