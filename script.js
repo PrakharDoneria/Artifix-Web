@@ -73,6 +73,7 @@ async function sendMessage() {
                     throw new Error('Error fetching news.');
                 }
             } catch (error) {
+                throw new Error(error);
                 console.error(error);
                 await displayErrorMessage(messageList, thinkingBubble, 'Error fetching news.');
             }
