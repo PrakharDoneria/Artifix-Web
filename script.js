@@ -105,7 +105,9 @@ async function sendMessage() {
                 const extract = wikipediaData.query.pages[pageId].extract;
 
                 if (extract) {
-                    await typeBotResponse(messageList, thinkingBubble, extract);
+                    // Extract the first paragraph as a summary
+                    const summary = extract.split('\n')[0];
+                    await typeBotResponse(messageList, thinkingBubble, summary);
                 } else {
                     throw new Error('No information found on Wikipedia.');
                 }
@@ -163,11 +165,13 @@ function saveChatHistory() {
     document.cookie = `chatHistory=${JSON.stringify(chatHistory)}`;
 }
 
+// Get cookie by name
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? match[2] : null;
 }
 
+// Populate chat history from cookies
 function populateChatHistory() {
     const messageList = document.getElementById('messageList');
     const chatHistory = JSON.parse(getCookie('chatHistory')) || [];
@@ -182,6 +186,7 @@ function populateChatHistory() {
     messageList.scrollTop = messageList.scrollHeight;
 }
 
+// Initial population of chat history
 populateChatHistory();
 
 window.addEventListener('beforeunload', () => saveChatHistory());
