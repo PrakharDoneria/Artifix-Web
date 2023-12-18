@@ -28,7 +28,8 @@ async function displayErrorMessage(messageList, thinkingBubble, error) {
 }
 
 async function fetchWikipediaSummary(query) {
-    const wikipediaApiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles=${query}&origin=*`;
+    const formattedQuery = encodeURIComponent(query);
+    const wikipediaApiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles=${formattedQuery}&origin=*`;
 
     try {
         const response = await fetch(wikipediaApiUrl);
@@ -38,7 +39,6 @@ async function fetchWikipediaSummary(query) {
         const extract = data.query.pages[pageId]?.extract;
 
         if (extract) {
-            // Clean up HTML tags and extract the first paragraph as a summary
             const summary = extract.replace(/<\/?[^>]+(>|$)/g, '').split('\n')[0];
             return summary.trim() !== '' ? summary : null;
         } else {
@@ -63,8 +63,7 @@ async function sendMessage() {
     thinkingBubble.style.display = 'inline';
     document.getElementById('status').textContent = 'Typing...';
 
-    // Fetch user's location using ipinfo.io
-    const ipinfoApiKey = '7ccae9c8d8744e'; // Replace with your actual IPinfo.io API key
+    const ipinfoApiKey = '7ccae9c8d8744e';
     const ipinfoUrl = `https://ipinfo.io/json?token=${ipinfoApiKey}`;
 
     try {
@@ -72,7 +71,6 @@ async function sendMessage() {
         const ipinfoData = await ipinfoResponse.json();
         const userCity = ipinfoData.city;
 
-        // Check for specific queries
         if (userInput.toLowerCase().includes('day today') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('date today')) {
             const currentDate = new Date();
             const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
@@ -80,7 +78,6 @@ async function sendMessage() {
         } else if (userInput.toLowerCase().includes('news')) {
             const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db';
             const country = 'us';
-
             const newsApiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${newsApiKey}`;
 
             try {
