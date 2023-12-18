@@ -1,10 +1,19 @@
-async function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function decodeHtml(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
 
 async function typeBotResponse(messageList, thinkingBubble, response) {
     const botMessage = document.createElement('div');
     botMessage.className = 'message botMessage';
 
-    const textNode = document.createTextNode(response);
+    const decodedResponse = decodeHtml(response);
+    const textNode = document.createTextNode(decodedResponse);
     botMessage.appendChild(textNode);
 
     thinkingBubble.style.display = 'none';
@@ -83,8 +92,8 @@ async function sendMessage() {
             const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
             await typeBotResponse(messageList, thinkingBubble, response);
         } else {
-            const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
-            const openaiApiKey = 'OpenAI-API-KEY';
+            const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-004/completions';
+            const openaiApiKey = 'OpenAI-API-KEY'; // Replace with your OpenAI API key
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
