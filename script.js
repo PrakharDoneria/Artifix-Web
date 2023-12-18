@@ -1,6 +1,4 @@
-async function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+async function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
 
 async function typeBotResponse(messageList, thinkingBubble, response) {
     const botMessage = document.createElement('div');
@@ -75,11 +73,9 @@ async function sendMessage() {
 
     try {
         if (userInput.toLowerCase().includes('ask me a question')) {
-            // Trivia question API code
             const triviaQuestion = await fetchTriviaQuestion();
             await typeBotResponse(messageList, thinkingBubble, `Sure, here's a trivia question for you:\n${triviaQuestion}`);
         } else if (userInput.toLowerCase().includes('help me in homework')) {
-            // Homework question API code
             const homeworkSolution = await solveHomeworkQuestion();
             await typeBotResponse(messageList, thinkingBubble, homeworkSolution);
         } else if (userInput.toLowerCase().includes('day today') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('date today')) {
@@ -87,7 +83,6 @@ async function sendMessage() {
             const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
             await typeBotResponse(messageList, thinkingBubble, response);
         } else {
-            // OpenAI GPT-3 code (unchanged)
             const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
             const openaiApiKey = 'OpenAI-API-KEY';
 
