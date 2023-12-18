@@ -54,9 +54,9 @@ body {
 }
 
 #messageList {
-    padding: 80px 20px 20px;
+    padding: 20px; /* Adjust padding as needed */
     overflow-y: auto;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 160px); /* Adjust max-height accordingly */
 }
 
 .message {
@@ -84,7 +84,7 @@ body {
 }
 
 #userInput {
-    width: calc(100% - 40px);
+    width: calc(100% - 80px); /* Adjust width to leave space for the button */
     padding: 15px;
     margin: 20px;
     border: none;
@@ -106,9 +106,7 @@ body {
     padding: 15px;
     border-radius: 20px;
     cursor: pointer;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+    margin: 20px; /* Adjust margin to create space between input and button */
 }
 
 #thinkingBubble {
