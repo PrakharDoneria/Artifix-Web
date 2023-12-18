@@ -102,12 +102,17 @@ async function sendMessage() {
                 const wikipediaData = await wikipediaResponse.json();
 
                 const pageId = Object.keys(wikipediaData.query.pages)[0];
-                const extract = wikipediaData.query.pages[pageId].extract;
+                const extract = wikipediaData.query.pages[pageId]?.extract;
 
                 if (extract) {
                     // Clean up HTML tags and extract the first paragraph as a summary
                     const summary = extract.replace(/<\/?[^>]+(>|$)/g, '').split('\n')[0];
-                    await typeBotResponse(messageList, thinkingBubble, summary);
+
+                    if (summary.trim() !== '') {
+                        await typeBotResponse(messageList, thinkingBubble, summary);
+                    } else {
+                        throw new Error('No relevant information found on Wikipedia.');
+                    }
                 } else {
                     throw new Error('No information found on Wikipedia.');
                 }
