@@ -27,7 +27,6 @@ async function displayErrorMessage(messageList, thinkingBubble, error) {
     document.getElementById('status').textContent = 'Online';
 }
 
-
 async function sendMessage() {
     const userInput = document.getElementById('userInput').value;
     const messageList = document.getElementById('messageList');
@@ -56,16 +55,23 @@ async function sendMessage() {
             const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
             await typeBotResponse(messageList, thinkingBubble, response);
         } else if (userInput.toLowerCase().includes('news')) {
-            // Fetch news using News API based on user's city
+            // Fetch news using News API based on user's country (you can use userCity or a default country)
             const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db';
-            const newsApiUrl = `https://newsapi.org/v2/top-headlines?q=${userCity}&apiKey=${newsApiKey}`;
+            const country = 'us'; // Replace with user's country or set a default
+
+            const newsApiUrl = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${newsApiKey}`;
 
             try {
                 const newsResponse = await fetch(newsApiUrl);
                 const newsData = await newsResponse.json();
-                const articles = newsData.articles.slice(0, 3); // Displaying top 3 articles
-                const response = articles.map(article => `${article.title} - ${article.url}`).join('\n');
-                await typeBotResponse(messageList, thinkingBubble, response);
+
+                if (newsData.status === 'ok') {
+                    const articles = newsData.articles.slice(0, 3); // Displaying top 3 articles
+                    const response = articles.map(article => `${article.title} - ${article.url}`).join('\n');
+                    await typeBotResponse(messageList, thinkingBubble, response);
+                } else {
+                    throw new Error('Error fetching news.');
+                }
             } catch (error) {
                 console.error(error);
                 await displayErrorMessage(messageList, thinkingBubble, 'Error fetching news.');
@@ -91,7 +97,7 @@ async function sendMessage() {
         } else {
             // Default behavior using OpenAI GPT-3
             const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
-            const openaiApiKey = 'OpenAI-API-KEY';
+            const openaiApiKey = 'OpenAI-API-KEY'; // Replace with your actual OpenAI GPT-3 API key
 
             try {
                 const response = await fetch(apiUrl, {
@@ -126,7 +132,6 @@ async function sendMessage() {
 
     document.getElementById('userInput').value = '';
 }
-
 
 function saveChatHistory() {
     const messageList = document.getElementById('messageList');
