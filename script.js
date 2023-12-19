@@ -31,6 +31,20 @@ async function displayErrorMessage(messageList, thinkingBubble, error) {
     document.getElementById('status').textContent = 'Online';
 }
 
+async function fetchUserLocation() {
+    const ipinfoApiKey = 'YOUR_IPINFO_API_KEY'; // Replace with your IPinfo.io API key
+    const ipinfoUrl = `https://ipinfo.io/json?token=${ipinfoApiKey}`;
+
+    try {
+        const ipinfoResponse = await fetch(ipinfoUrl);
+        const ipinfoData = await ipinfoResponse.json();
+        return ipinfoData.city || 'Unknown';
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error fetching user location.');
+    }
+}
+
 async function fetchTriviaQuestion() {
     const triviaApiUrl = 'https://opentdb.com/api.php?amount=1&type=multiple';
 
@@ -49,21 +63,35 @@ async function fetchTriviaQuestion() {
     }
 }
 
-async function solveHomeworkQuestion() {
-    const homeworkApiUrl = 'https://example.com/homework-api'; // Replace with the actual API endpoint
+async function fetchNews(userCity) {
+    const newsApiKey = 'a1dcbaf052cd4e959ec5259eba1157db';
+    const newsApiUrl = `https://newsapi.org/v2/top-headlines?q=${userCity}&apiKey=${newsApiKey}`;
 
     try {
-        const response = await fetch(homeworkApiUrl);
-        const data = await response.json();
-
-        if (data.question && data.answer) {
-            return `Here's the solution for your homework question:\nQuestion: ${data.question}\nAnswer: ${data.answer}`;
-        } else {
-            throw new Error('Error fetching homework question.');
-        }
+        const newsResponse = await fetch(newsApiUrl);
+        const newsData = await newsResponse.json();
+        const articles = newsData.articles.slice(0, 3); // Displaying top 3 articles
+        return articles.map(article => `${article.title} - ${article.url}`).join('\n');
     } catch (error) {
         console.error(error);
-        throw new Error('Error fetching homework question.');
+        throw new Error('Error fetching news.');
+    }
+}
+
+async function fetchTemperature(userCity) {
+    const weatherApiKey = '4b08a31d0b102256e3becde9631af19d';
+    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${userCity}&appid=${weatherApiKey}`;
+
+    try {
+        const weatherResponse = await fetch(weatherApiUrl);
+        const weatherData = await weatherResponse.json();
+        const temperatureKelvin = weatherData.main.temp;
+        const temperatureCelsius = temperatureKelvin - 273.15;
+        const roundedTemperature = Math.round(temperatureCelsius); // Round to two decimal places
+        return `The current temperature in ${userCity} is ${roundedTemperature}°C.`;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error fetching temperature.');
     }
 }
 
@@ -84,10 +112,19 @@ async function sendMessage() {
         if (userInput.toLowerCase().includes('ask me a question')) {
             const triviaQuestion = await fetchTriviaQuestion();
             await typeBotResponse(messageList, thinkingBubble, `Sure, here's a trivia question for you:\n${triviaQuestion}`);
-        } else if (userInput.toLowerCase().includes('help me in homework')) {
-            const homeworkSolution = await solveHomeworkQuestion();
-            await typeBotResponse(messageList, thinkingBubble, homeworkSolution);
-        } else if (userInput.toLowerCase().includes('day today') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('date today')) {
+        } else if (userInput.toLowerCase().includes('news')) {
+            // Fetch user's location
+            const userCity = await fetchUserLocation();
+
+            // Fetch news based on user's city
+            const newsResponse = await fetchNews(userCity);
+            await typeBotResponse(messageList, thinkingBubble, newsResponse);
+        } else if (userInput.toLowerCase().includes('temperature')) {
+            // Fetch temperature based on user's city
+            const userCity = await fetchUserLocation();
+            const temperatureResponse = await fetchTemperature(userCity);
+            await typeBotResponse(messageList, thinkingBubble, temperatureResponse);
+        } else if (userInput.toLowerCase().includes('date') || userInput.toLowerCase().includes('time') || userInput.toLowerCase().includes('day')) {
             const currentDate = new Date();
             const response = `Today is ${currentDate.toDateString()} and the time is ${currentDate.toLocaleTimeString()}.`;
             await typeBotResponse(messageList, thinkingBubble, response);
@@ -153,6 +190,6 @@ function populateChatHistory() {
     messageList.scrollTop = messageList.scrollHeight;
 }
 
-// Populate chat history and save on page unload
 populateChatHistory();
+
 window.addEventListener('beforeunload', () => saveChatHistory());
