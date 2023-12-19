@@ -32,7 +32,7 @@ async function displayErrorMessage(messageList, thinkingBubble, error) {
 }
 
 async function fetchUserLocation() {
-    const ipinfoApiKey = 'YOUR_IPINFO_API_KEY'; // Replace with your IPinfo.io API key
+    const ipinfoApiKey = '7ccae9c8d8744e'; // Replace with your IPinfo.io API key
     const ipinfoUrl = `https://ipinfo.io/json?token=${ipinfoApiKey}`;
 
     try {
